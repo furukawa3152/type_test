@@ -75,21 +75,34 @@ def main():
         # 質問文をそのまま表示（番号は既に含まれている）
         st.write(f"**{question_text}**")
         
-        # 回答選択
+        # 回答選択（初期値なし、未選択状態）
+        if question_num in st.session_state.answers:
+            # 既に回答済みの場合は、その値をデフォルトに
+            default_index = st.session_state.answers[question_num]
+        else:
+            # 未回答の場合はNoneを設定（未選択状態）
+            default_index = None
+        
         answer = st.radio(
             f"質問{question_num}の回答",
             options=[0, 1, 2, 3],
             key=f"q_{question_num}",
-            index=st.session_state.answers.get(question_num, 0),
+            index=default_index,
             horizontal=True,
             label_visibility="collapsed"
         )
         
-        st.session_state.answers[question_num] = answer
+        # 回答が選択された場合のみセッション状態を更新
+        if answer is not None:
+            st.session_state.answers[question_num] = answer
+        
         st.write("---")
     
     # 全ての質問に回答済みの場合、結果を計算・表示
-    if len(st.session_state.answers) == len(questions_df) and all(v >= 0 for v in st.session_state.answers.values()):
+    total_questions = len(questions_df)
+    answered_questions = len(st.session_state.answers)
+    
+    if answered_questions == total_questions:
         st.subheader("診断結果")
         
         # スコア計算
@@ -284,9 +297,15 @@ def main():
             st.rerun()
     
     else:
-        remaining = len(questions_df) - len([v for v in st.session_state.answers.values() if v >= 0])
+        remaining = total_questions - answered_questions
         if remaining > 0:
             st.info(f"残り {remaining} 問の質問に回答してください。")
+        
+        # 進捗表示
+        if answered_questions > 0:
+            progress = answered_questions / total_questions
+            st.progress(progress)
+            st.write(f"回答済み: {answered_questions}/{total_questions}")
     
     # 管理者情報を最下部に表示
     st.markdown("---")
