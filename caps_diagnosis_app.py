@@ -67,6 +67,13 @@ def main():
     # 質問表示と回答入力
     st.subheader("質問項目")
     
+    # 回答の説明を追加
+    st.markdown("""
+    **回答の基準:**  
+    3 = あてはまる　2 = どちらかといえばあてはまる　1 = どちらかといえばあてはまらない　0 = あてはまらない
+    """)
+    st.markdown("---")
+    
     # 全ての質問を1ページで表示
     for i, row in questions_df.iterrows():
         question_num = i + 1
